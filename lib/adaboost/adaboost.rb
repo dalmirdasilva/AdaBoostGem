@@ -12,6 +12,39 @@ module AdaBoost
       @y_index = y_index
     end
 
+    def train samples
+      if Config::OVER_SAMPLING_TRAINING_SET 
+        resampler = Resampler.new @y_index
+        resampler.over_sample samples
+      end
+      initialize_weights samples
+      0.upto @number_of_classifiers - 1 do |i|
+        weak_classifier = @weak_learner.generate_weak_classifier samples, @weights
+        weak_classifier.compute_alpha
+        update_weights weak_classifier, samples
+        @weak_classifiers << weak_classifier
+      end
+    end
+
+    def classify sample
+      score = 0.0
+      @weak_classifiers.each do |weak_classifier| 
+        score += weak_classifier.classify_with_alpha sample
+      end
+      score
+    end
+
+    def self.build_from_model model, y_index = 0
+      classifiers = model.weak_classifiers
+      adaboost = AdaBoost.new classifiers.size, y_index
+      classifiers.each do |classifier|
+        adaboost.weak_classifiers << WeakClassifier.new(classifier.feature_number, classifier.split, classifier.alpha)
+      end
+      adaboost
+    end
+
+    private
+
     def initialize_weights samples
       samples_size = samples.size.to_f
       negative_weight = 1 / samples_size
@@ -45,39 +78,6 @@ module AdaBoost
       @weights.each_with_index do |_, i|
           @weights[i] /= sum
       end
-    end
-
-    def train samples
-      puts 'starting training'
-      if Config::OVER_SAMPLING_TRAINING_SET 
-        resampler = Resampler.new @y_index
-        resampler.over_sample samples
-      end
-      initialize_weights samples
-      0.upto @number_of_classifiers - 1 do |i|
-        puts 'generating next weak classifier'
-        weak_classifier = @weak_learner.generate_weak_classifier samples, @weights
-        weak_classifier.compute_alpha
-        update_weights weak_classifier, samples
-        @weak_classifiers << weak_classifier
-      end
-    end
-
-    def classify sample
-      score = 0.0
-      @weak_classifiers.each do |weak_classifier| 
-        score += weak_classifier.classify_with_alpha sample
-      end
-      score
-    end
-
-    def self.build_from_model model, y_index = 0
-      classifiers = model.weak_classifiers
-      adaboost = AdaBoost.new classifiers.size, y_index
-      classifiers.each do |classifier|
-        adaboost.weak_classifiers << WeakClassifier.new(classifier.feature_number, classifier.split, classifier.alpha)
-      end
-      adaboost
     end
   end
 end

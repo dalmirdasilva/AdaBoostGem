@@ -50,6 +50,8 @@ module AdaBoost
       best
     end
 
+    private
+
     def generate_random_classifiers samples, number_of_features
       classifiers = []
       statistics = features_satistics samples

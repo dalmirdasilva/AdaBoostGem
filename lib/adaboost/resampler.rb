@@ -23,6 +23,8 @@ module AdaBoost
       end
     end
 
+    private
+
     def distribution instances
       analyzer = FeaturesAnalyzer.new @y_index
       analyzer.analyze(instances).distribution
