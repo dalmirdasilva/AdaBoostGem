@@ -23,6 +23,7 @@ module AdaBoost
         weak_classifier.compute_alpha
         update_weights weak_classifier, samples
         @weak_classifiers << weak_classifier
+        yield i, weak_classifier if block_given? 
       end
     end
 
@@ -50,21 +51,21 @@ module AdaBoost
       negative_weight = 1 / samples_size
       positive_weight = negative_weight
       if Config::INCORPORATE_COST_SENSITIVE_LEARNING
-          analyzer = FeaturesAnalyzer.new @y_index
-          distribution = analyzer.analyze(samples).distribution
-          positive_rate = distribution.positive / samples_size
-          negative_rate = distribution.negative / samples_size
-          normalizing_constant = distribution.negative * positive_rate + distribution.positive * negative_rate
-          positive_weight = positive_rate / normalizing_constant.to_f
-          negative_weight = negative_rate / normalizing_constant.to_f
+        analyzer = FeaturesAnalyzer.new @y_index
+        distribution = analyzer.analyze(samples).distribution
+        positive_rate = distribution.positive / samples_size
+        negative_rate = distribution.negative / samples_size
+        normalizing_constant = distribution.negative * positive_rate + distribution.positive * negative_rate
+        positive_weight = positive_rate / normalizing_constant.to_f
+        negative_weight = negative_rate / normalizing_constant.to_f
       end
       samples.each_with_index do |sample, i|
-          y = sample[@y_index]
-          if y == -1 
-              @weights[i] = positive_weight
-          else 
-              @weights[i] = negative_weight
-          end
+        y = sample[@y_index]
+        if y == -1 
+          @weights[i] = positive_weight
+        else 
+          @weights[i] = negative_weight
+        end
       end
     end
 
@@ -76,7 +77,7 @@ module AdaBoost
         sum += @weights[i]
       end
       @weights.each_with_index do |_, i|
-          @weights[i] /= sum
+        @weights[i] /= sum
       end
     end
   end
