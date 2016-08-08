@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'adaboost'
-  s.version     = '0.0.3'
+  s.version     = '0.0.4'
   s.date        = '2016-07-25'
   s.summary     = 'AdaBoost classifier!'
   s.description = 'AdaBoost classifier!'
