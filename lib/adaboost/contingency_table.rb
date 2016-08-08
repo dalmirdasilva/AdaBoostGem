@@ -22,7 +22,7 @@ module AdaBoost
       @table[1][0]
     end
 
-    def add_prediction y, h
+    def add_prediction(y, h)
       @table[class_to_index(y)][class_to_index(h)] += 1
     end
 
@@ -175,8 +175,8 @@ module AdaBoost
       ]
     end
 
-    def class_to_index k
-      k > 0 ? 1 : 0
+    def class_to_index(k)
+      (k > 0) ? 1 : 0
     end
   end
 end

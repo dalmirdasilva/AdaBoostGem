@@ -7,45 +7,45 @@ module AdaBoost
 
   class FeaturesAnalyzer
 
-    def initialize y_index
+    def initialize(y_index)
       @y_index = y_index
     end
 
-    def analyze samples
+    def analyze(samples)
       
       statistics = []
-      distribution = Distribution.new 0, 0
+      distribution = Distribution.new(0, 0)
       number_of_samples = samples.size
       
       if number_of_samples < 1
-        raise ArgumentError.new 'At least one sample is needed to analyze.'
+        raise ArgumentError.new('At least one sample is needed to analyze.')
       end
       number_of_features = @y_index
       sample_size = samples[0].size
       if number_of_features < 1 or sample_size < 2 or sample_size <= @y_index
-        raise ArgumentError.new 'At least 1 feature is needed to analyze.'
+        raise ArgumentError.new('At least 1 feature is needed to analyze.')
       end
-      0.upto number_of_features - 1 do
-          statistics << FeatureStatistic.new(Float::MAX, -Float::MAX, 0, 0, 0, 0)
+      0.upto(number_of_features - 1) do
+        statistics << FeatureStatistic.new(Float::MAX, -Float::MAX, 0, 0, 0, 0)
       end
       samples.each do |sample|
-          y = sample[@y_index]
-          if y == -1
-              distribution.negative += 1
-          else
-              distribution.positive += 1
+        y = sample[@y_index]
+        if y == -1
+            distribution.negative += 1
+        else
+            distribution.positive += 1
+        end
+        0.upto(number_of_features - 1) do |i|
+          statistic = statistics[i]
+          feature_value = sample[i]
+          if feature_value < statistic.min
+            statistic.min = feature_value
           end
-          0.upto number_of_features - 1 do |i|
-              statistic = statistics[i]
-              feature_value = sample[i]
-              if feature_value < statistic.min
-                  statistic.min = feature_value
-              end
-              if feature_value > statistic.max
-                  statistic.max = feature_value
-              end
-              statistic.sum += feature_value
+          if feature_value > statistic.max
+            statistic.max = feature_value
           end
+          statistic.sum += feature_value
+        end
       end
       statistics.each do |statistic|
         statistic.avg = statistic.sum / number_of_samples.to_f
@@ -67,7 +67,7 @@ module AdaBoost
       analyze
     end
 
-    def relations x, y, samples, statistics
+    def relations(x, y, samples, statistics)
       sum = 0.0
       samples.each do |sample|
         x_value = sample[x].to_f
@@ -76,7 +76,7 @@ module AdaBoost
       end
       cov = sum / (samples.size - 1).to_f
       cor = cov / (statistics[x].std * statistics[y].std).to_f
-      VariableRelations.new x, y, cov, cor
+      VariableRelations.new(x, y, cov, cor)
     end
   end
 end

@@ -2,26 +2,26 @@ module AdaBoost
 
   class Evaluator
 
-    def initialize classifier
+    def initialize(classifier)
       @classifier = classifier
       @threshold = Float::MAX
     end
 
-    def evaluate test_set
+    def evaluate(test_set)
       contingency_table = ContingencyTable.new
       test_set.each do |sample|
         y = sample[@classifier.y_index]
-        if Config::USE_THRESHOLD_CLASSIFICATION
-          h = classify_using_threshold sample
+        h = if Config::USE_THRESHOLD_CLASSIFICATION
+          classify_using_threshold(sample)
         else
-          h = e.classify_normally sample
+          classify_normally(sample)
         end
-        contingency_table.add_prediction y, h
+        contingency_table.add_prediction(y, h)
       end
       contingency_table
     end
 
-    def used_feature_numbers unique = false
+    def used_feature_numbers(unique = false)
       used_feature_numbers = []
       @classifier.weak_classifiers.each do |weak_classifier|
         used_feature_numbers << weak_classifier.feature_number
@@ -51,11 +51,11 @@ module AdaBoost
       @threshold
     end
 
-    def classify_normally sample
+    def classify_normally(sample)
       @classifier.classify(sample > 0) ? 1 : -1
     end
 
-    def classify_using_threshold sample
+    def classify_using_threshold(sample)
       score = 0.0
       @classifier.weak_classifiers.each do |weak_classifier|
         if sample[weak_classifier.feature_number] > weak_classifier.split

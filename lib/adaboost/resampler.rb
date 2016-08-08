@@ -2,12 +2,12 @@ module AdaBoost
 
   class Resampler
 
-    def initialize y_index
+    def initialize(y_index)
       @y_index = y_index
     end
     
-    def over_sample samples
-      distribution = distribution samples
+    def over_sample(samples)
+      distribution = distribution(samples)
       y0 = distribution.negative
       y1 = distribution.positive
       majority = y0 < y1 ? 1.0 : -1.0
@@ -25,8 +25,8 @@ module AdaBoost
 
     private
 
-    def distribution instances
-      analyzer = FeaturesAnalyzer.new @y_index
+    def distribution(instances)
+      analyzer = FeaturesAnalyzer.new(@y_index)
       analyzer.analyze(instances).distribution
     end
   end
